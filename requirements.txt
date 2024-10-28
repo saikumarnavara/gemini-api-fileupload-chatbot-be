@@ -1,5 +1,6 @@
-fastapi==0.95.2
-uvicorn==0.22.0
-python-dotenv==1.0.0
-google-generativeai==0.1.0
-PyMuPDF==1.22.5
+fastapi>=0.95.2,<1.0
+uvicorn>=0.22.0,<0.23
+python-dotenv>=1.0.0,<2.0
+google-generativeai>=0.1.0,<0.2
+PyMuPDF>=1.22.5,<1.23
+starlette>=0.20.4,<0.21
