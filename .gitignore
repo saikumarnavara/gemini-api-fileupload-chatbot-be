@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# Vercel build output
+.vercel/
+
+# Logs
+*.log
+
+# Virtual environment
+venv/
+.env/
+
+# Jupyter Notebook checkpoints (if any)
+.ipynb_checkpoints/
+
+# macOS files
+.DS_Store
+
+# Python package files
+*.egg-info/
+dist/
+build/
