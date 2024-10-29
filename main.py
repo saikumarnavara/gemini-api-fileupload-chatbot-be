@@ -115,8 +115,14 @@ def upload_file_to_gemini(sourceFile):
         raise ValueError("File upload response does not contain a file ID or unique identifier.")
 
 def multimodal_search(image_data, prompt):
-    image_r = Image.open(BytesIO(image_data))  
-    response =  model.generate_content([prompt, image_r])  
+    image_r = Image.open(BytesIO(image_data)) 
+    prompt__ = (
+    f"Given the following image:\n\n"
+    f"Please answer the following question based on the content of the image as accurately and concisely as possible:\n\n"
+    f"Question: {prompt}\n\n"
+    f"Provide only the information that directly addresses the question without extra details."
+) 
+    response =  model.generate_content([prompt__, image_r])  
     return response.text
 
 
