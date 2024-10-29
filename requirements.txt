@@ -1,8 +1,7 @@
 fastapi==0.95.2
 requests==2.31.0
 python-dotenv==1.0.0
-google-generative-ai==0.3.2
+google-generative-ai==0.1.0
 Pillow==10.0.0
 PyMuPDF==1.22.5
-
 
