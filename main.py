@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 import io
 import fitz
+from PIL import Image
+from io import BytesIO
+
 
 
 
@@ -39,12 +42,11 @@ def extract_text_from_pdf(file_io):
 def generate_gemini_response(prompt):
     chat_history.append(prompt)
     context = "\n".join(chat_history)  
-
     response = model.generate_content(context,generation_config=genai.types.GenerationConfig(
         candidate_count=1,
         stop_sequences=["x"],
-        max_output_tokens=500,
-        temperature=1.0,
+        max_output_tokens=1000,
+        temperature=0.1,
     ))
     chat_history.append(response.text)
     return response.text
@@ -59,6 +61,13 @@ def upload_file_to_gemini(sourceFile):
         return response.name  
     else:
         raise ValueError("File upload response does not contain a file ID or unique identifier.")
+
+def multimodal_search(image_data, prompt):
+    image_r = Image.open(BytesIO(image_data))  
+    response =  model.generate_content([prompt, image_r])  
+    return response.text
+
+
 
     
 
@@ -131,6 +140,15 @@ async def delete_document(file_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+@app.post('/multimodal-search/')
+async def multimodal_search_endpoint(image: UploadFile = File(...), prompt: str = None):
+    try:
+        image_data = await image.read()
+        response =  multimodal_search(image_data, prompt)
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get('/')
 async def root():
     return {"message": "Welcome to the Gemini API!"}
