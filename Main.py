@@ -1,9 +1,7 @@
 from fastapi import FastAPI, HTTPException,UploadFile,File
-import requests
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
-import PIL.Image
 import io
 import fitz
 
