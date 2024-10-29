@@ -123,6 +123,12 @@ async def delete_document(file_id: str):
             raise HTTPException(status_code=404, detail="Document not found.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get('/')
+async def root():
+    return {"message": "Welcome to the Gemini API!"}
+
+
 
     
    
