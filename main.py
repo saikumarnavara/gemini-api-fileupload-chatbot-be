@@ -13,13 +13,10 @@ load_dotenv()
 # FastAPI instance
 app = FastAPI()
 
-# get api key from .env file
-GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
-
 # Set the API key for google.generativeai explicitly
-google_api_key = os.getenv("GOOGLE_API_KEY")
-if google_api_key:
-    genai.configure(api_key=google_api_key)
+GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 else:
     raise RuntimeError("Google API Key is not set in environment variables.")
 
