@@ -16,8 +16,14 @@ app = FastAPI()
 # get api key from .env file
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Set up the Gemini API key
-genai.configure(api_key=GEMINI_API_KEY)
+# Set the API key for google.generativeai explicitly
+google_api_key = os.getenv("GOOGLE_API_KEY")
+if google_api_key:
+    genai.configure(api_key=google_api_key)
+else:
+    raise RuntimeError("Google API Key is not set in environment variables.")
+
+
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 # In-memory store for extracted document text
@@ -38,7 +44,7 @@ def generate_gemini_response(prompt):
         candidate_count=1,
         stop_sequences=["x"],
         max_output_tokens=500,
-        temperature=0.1,
+        temperature=1.0,
     ))
     return response.text
 
