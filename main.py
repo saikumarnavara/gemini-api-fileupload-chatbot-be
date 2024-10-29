@@ -25,9 +25,9 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 
 # In-memory store for extracted document text
 uploaded_docs = {}
+chat_history = []
 
 def extract_text_from_pdf(file_io):
-    # Open the PDF file
     text = ""
     pdf_document = fitz.open(stream=file_io, filetype="pdf")
     for page_num in range(pdf_document.page_count):
@@ -37,12 +37,16 @@ def extract_text_from_pdf(file_io):
     return text
 
 def generate_gemini_response(prompt):
-    response = model.generate_content(prompt,generation_config=genai.types.GenerationConfig(
+    chat_history.append(prompt)
+    context = "\n".join(chat_history)  
+
+    response = model.generate_content(context,generation_config=genai.types.GenerationConfig(
         candidate_count=1,
         stop_sequences=["x"],
         max_output_tokens=500,
         temperature=1.0,
     ))
+    chat_history.append(response.text)
     return response.text
 
 
