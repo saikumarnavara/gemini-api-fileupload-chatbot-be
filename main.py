@@ -52,6 +52,58 @@ def generate_gemini_response(prompt):
     return response.text
 
 
+def generate_document_response(prompt, document_text):
+    prompt = (
+    f"Given the following document text:\n\n{document_text}\n\n"
+    f"Please answer the following question based on the content of the document as accurately and concisely as possible:\n\n"
+    f"Question: {prompt}\n\n"
+    f"Provide only the information that directly addresses the question without extra details."
+    )
+    chat_history.append(prompt)
+    context = "\n".join(chat_history)  
+     # Combine the document content with the question for context
+    response = model.generate_content(
+    context,
+    generation_config=genai.types.GenerationConfig(
+        candidate_count=1,
+        stop_sequences=["x"], 
+        max_output_tokens=1500,  
+        temperature=0.1,
+    )
+)
+    chat_history.append(response.text)
+   
+    suggestive_prompt = ( 
+    f"Based on the document text below:\n\n{document_text}\n\n"
+    f"Generate the three most relevant follow-up questions for the following question: '{prompt}'."
+    f"These questions should help the user explore important details, clarify key points, or deepen understanding."
+    f"Only output the questions in the following format:\n\n"
+    f"1. [First question]\n"
+    f"2. [Second question]\n"
+    f"3. [Third question]\n\n"
+    f"Do not include any additional text or explanations."
+)
+    suggestions = model.generate_content(suggestive_prompt, generation_config=genai.types.GenerationConfig(
+        candidate_count=1,
+        stop_sequences=["x"],
+        max_output_tokens=100,  
+        temperature=0.1,
+    ))
+    
+    # Process suggestions into a list of questions
+    suggested_questions = suggestions.text.split("\n") if suggestions.text else []
+    
+    # Return the main response and cleaned list of suggested questions
+    return {
+        "response": response.text,
+        "suggested_questions": suggested_questions
+    }
+
+
+
+     
+
+
 def upload_file_to_gemini(sourceFile):
     response = genai.upload_file(sourceFile, mime_type="application/pdf")
     # Check for the presence of an ID or other unique identifier
@@ -106,12 +158,8 @@ async def ask_question(file_id: str, question: str):
         document_text = uploaded_docs.get(file_id)
         if not document_text:
             raise HTTPException(status_code=404, detail="Document not found.")
-        
-        # Combine the document content with the question for context
-        prompt = f"Based on the following document text:\n\n{document_text}\n\nAnswer this question: {question}"
-        response = generate_gemini_response(prompt)
-        
-        return {"response": response}
+        response = generate_document_response(question, document_text)
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
