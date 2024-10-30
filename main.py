@@ -7,7 +7,7 @@ import fitz
 from PIL import Image
 from io import BytesIO
 from pydantic import BaseModel
-
+from fastapi.middleware.cors import CORSMiddleware
 
 
 
@@ -16,6 +16,23 @@ load_dotenv()
 
 # FastAPI instance
 app = FastAPI()
+
+
+origins = [
+    "http://localhost",          
+    "http://localhost:3000",     
+    "http://localhost:5173/",       
+    "*"                        
+]
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,            # List of allowed origins
+    allow_credentials=True,           # Allow cookies and credentials
+    allow_methods=["*"],              # Allow all HTTP methods
+    allow_headers=["*"],              # Allow all headers
+)
 
 # Set the API key for google.generativeai explicitly
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
