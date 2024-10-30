@@ -6,6 +6,7 @@ import io
 import fitz
 from PIL import Image
 from io import BytesIO
+from pydantic import BaseModel
 
 
 
@@ -126,7 +127,11 @@ def multimodal_search(image_data, prompt):
     return response.text
 
 
-
+class PromptRequest(BaseModel):
+    prompt: str
+class DocumentSearchRequest(BaseModel):
+    file_id: str
+    question: str
     
 
 
@@ -134,9 +139,9 @@ def multimodal_search(image_data, prompt):
 # API ROUTES
 
 @app.post("/text-search/")
-async def generate_response(prompt: str):
+async def generate_response(request: PromptRequest):
     try:
-        response = generate_gemini_response(prompt)
+        response = generate_gemini_response(request.prompt)
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -157,14 +162,18 @@ async def upload_source_file(sourceFile: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.post('/document-search/')
-async def ask_question(file_id: str, question: str):
+
+
+@app.post("/document-search/")
+async def ask_question(request: DocumentSearchRequest):
     try:
         # Retrieve the document text from in-memory storage
-        document_text = uploaded_docs.get(file_id)
+        document_text = uploaded_docs.get(request.file_id)
         if not document_text:
             raise HTTPException(status_code=404, detail="Document not found.")
-        response = generate_document_response(question, document_text)
+        
+        # Generate a response based on the document text and question
+        response = generate_document_response(request.question, document_text)
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
