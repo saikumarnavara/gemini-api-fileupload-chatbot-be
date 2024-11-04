@@ -10,7 +10,6 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 
-
 # Load environment variables
 load_dotenv()
 
@@ -84,8 +83,8 @@ def generate_document_response(prompt, document_text):
     context,
     generation_config=genai.types.GenerationConfig(
         candidate_count=1,
-        stop_sequences=["x"], 
-        max_output_tokens=1500,  
+        stop_sequences=[], 
+        max_output_tokens=10000,  
         temperature=0.1,
     )
 )
@@ -103,15 +102,11 @@ def generate_document_response(prompt, document_text):
 )
     suggestions = model.generate_content(suggestive_prompt, generation_config=genai.types.GenerationConfig(
         candidate_count=1,
-        stop_sequences=["x"],
-        max_output_tokens=100,  
+        stop_sequences=[],
+        max_output_tokens=200,  
         temperature=0.1,
     ))
-    
-    # Process suggestions into a list of questions
     suggested_questions = suggestions.text.split("\n") if suggestions.text else []
-    
-    # Return the main response and cleaned list of suggested questions
     return {
         "response": response.text,
         "suggested_questions": suggested_questions
