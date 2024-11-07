@@ -61,15 +61,31 @@ def extract_text_from_pdf(file_io):
 
 def generate_gemini_response(prompt):
     chat_history.append(prompt)
-    context = "\n".join(chat_history)  
-    response = model.generate_content(context,generation_config=genai.types.GenerationConfig(
-        candidate_count=1,
-        stop_sequences=["x"],
-        max_output_tokens=1000,
-        temperature=0.1,
-    ))
-    chat_history.append(response.text)
-    return response.text
+    context = "\n".join(chat_history)
+    formatted_prompt = (
+        f"{context}\n\n"
+        "Please respond to the following prompt in Markdown format, using bullet points, lists, tables, or headers as needed. "
+        "Ensure that the response is concise, relevant, and structured for easy readability.\n\n"
+        f"**Prompt:** {prompt}\n\n"
+        "**Instructions:**\n"
+        "- Provide direct, well-structured answers to the question.\n"
+        "- Use Markdown elements like headers (`#`), bullet points (`-`), tables, or numbered lists to organize information.\n"
+        "- Focus on accuracy and clarity, answering based on the context of previous messages.\n\n"
+        "Return only the Markdown response text."
+    )
+    response = model.generate_content(
+        formatted_prompt,
+        generation_config=genai.types.GenerationConfig(
+            candidate_count=1,
+            stop_sequences=[],
+            temperature=0.5,
+            # max_output_tokens=1000,
+        )
+    )
+    chat_history.append(response.text.strip())
+
+    return response.text.strip()
+
 
 
 def generate_document_response(prompt, document_text):
@@ -139,11 +155,15 @@ def upload_file_to_gemini(sourceFile):
 def multimodal_search(image_data, prompt):
     image_r = Image.open(BytesIO(image_data)) 
     prompt__ = (
-    f"Given the following image:\n\n"
-    f"Please answer the following question based on the content of the image as accurately and concisely as possible:\n\n"
-    f"Question: {prompt}\n\n"
-    f"Provide only the information that directly addresses the question without extra details."
-) 
+        f"Analyze the provided image in detail. Identify key visual elements, context, and relevant patterns "
+        f"or information that could answer the question below as accurately as possible:\n\n"
+        f"Image Analysis:\n\n"
+        f"Based on the image content, please answer the following question:\n\n"
+        f"**Question:** {prompt}\n\n"
+        f"**Instructions:** Provide a concise, well-structured answer in Markdown format, including "
+        f"bullet points, lists, or tables if they help to present the information clearly. Respond directly "
+        f"to the question, focusing on visual evidence from the image."
+    )
     response =  model.generate_content([prompt__, image_r])  
     return response.text
 
